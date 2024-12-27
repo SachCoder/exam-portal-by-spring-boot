@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.entities.Role;
 import com.entities.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -24,13 +25,27 @@ public class CustomUserDetails implements UserDetails {
     private String password;
     private String email;
     private Collection<? extends GrantedAuthority> authorities;
+    private User user;
+ 
+ 
+private String mobile;
+	private String phone;
+private String Status;
+private String otp;
+ 
 
-    public CustomUserDetails(String id, String userName, String password, String eMail, Collection<? extends GrantedAuthority> authorities) {
+    public CustomUserDetails(String id, String userName, String password, String eMail, 
+    		Collection<? extends GrantedAuthority> authorities,User user,String mobile,String phone, String Status, String otp) {
         this.id = id;
         this.username = userName;
         this.password = password;
         this.email = eMail;
+        this.mobile=mobile;
+        this.phone = phone;
+        this.Status = Status;
+        this.otp = otp;
         this.authorities = authorities;
+        this.user = user;
     }
 
     public static CustomUserDetails create(User user) {
@@ -41,7 +56,7 @@ public class CustomUserDetails implements UserDetails {
 			grantedAuthorityList.add(new SimpleGrantedAuthority("ROLE_"+role.getName()));
 //			System.out.println(role.getName());
 		}
-        return new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), user.getEmail(), grantedAuthorityList);
+        return new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), user.getEmail(), grantedAuthorityList,user,user.getMobile(),user.getPhone(),user.getStatus(),user.getOtp());
     }
 
     @Override

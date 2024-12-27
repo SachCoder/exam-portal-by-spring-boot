@@ -71,4 +71,6 @@ public interface BiometricMessage {
 	    String ADDED_TO_FAVORITES = "Added To Favorites";
 
 	    String REMOVE_FROM_FAVORITES = "Remove From Favorites";
+
+		String PASSWORD_SENT_SUCCESS = "success send passsword on email";
 	}

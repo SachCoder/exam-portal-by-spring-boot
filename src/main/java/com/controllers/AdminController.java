@@ -11,10 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dto.UserDeleteRequest;
 import com.service.UserService;
 import com.shared.BiometricMessage;
-
-import dto.UserDeleteRequest;
 
 @RestController
 @RequestMapping("/admin")

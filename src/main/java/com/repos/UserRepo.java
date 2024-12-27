@@ -10,8 +10,6 @@ import org.springframework.stereotype.Repository;
 
 import com.entities.User;
 
-import dto.UserDeleteRequest;
-
 
 @Repository
 public interface UserRepo extends JpaRepository<User, String>{
@@ -24,7 +22,7 @@ public interface UserRepo extends JpaRepository<User, String>{
 	User findByIds(@Param("id") String id);
 	@Query("select u from User u where u.email = :email and u.mobile= :mobile" )
 	public List<User> findByEmailOrMobile(@Param("email") String email, @Param("mobile") String mobile);
-	@Query("select u from User u where u.email = :email and u.otp= :otp" )
+//	@Query("select u from User u where u.email = :email and u.otp= :otp" )
 	User findByEmailAndOtp(@Param("email") String email,@Param("otp") String otp);
   
 }

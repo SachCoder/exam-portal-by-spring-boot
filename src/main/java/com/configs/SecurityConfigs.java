@@ -18,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.security.BiometricAuthenticationEntryPoint;
+import com.security.ExamAuthenticationEntryPoint;
 import com.security.JwtAuthenticationFilter;
 
 @Configuration
@@ -26,7 +26,7 @@ import com.security.JwtAuthenticationFilter;
 //@EnableWebSecurity
 public class SecurityConfigs{
 @Autowired
-private BiometricAuthenticationEntryPoint entrypoint;
+private ExamAuthenticationEntryPoint entrypoint;
 //@Autowired
 //private LoginSuccessHandler loginSuccessHandler;
 	@Autowired
@@ -62,7 +62,8 @@ private BiometricAuthenticationEntryPoint entrypoint;
     	
         http.authorizeHttpRequests(requests ->
         requests
-        .requestMatchers("/register" ,"/deleteByUser" ,"/login" ).permitAll()
+        .requestMatchers("/register" ,"/deleteByUser" ,"/login" ,"/forgetPass").permitAll()
+        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
         
       		  .requestMatchers(HttpMethod.OPTIONS).permitAll()        
               		.anyRequest().authenticated())

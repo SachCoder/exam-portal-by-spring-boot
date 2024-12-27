@@ -2,8 +2,8 @@ package com.controllers;
 
  
 
-import java.util.Collection;
-
+import java.security.Principal;
+ 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,29 +11,27 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
+ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
+ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+  import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.dto.UserCreateDto;
+import com.dto.UserLoginDto;
+import com.dto.UserVerifyDto;
 import com.entities.JwtResponse;
-import com.repos.UserRepo;
-import com.security.CustomUserDetailsService;
+import com.entities.User;
+ import com.security.CustomUserDetailsService;
 import com.security.JwtTokenProvider;
 import com.service.UserService;
 import com.shared.BiometricMessage;
 
-import dto.UserCreateDto;
-import dto.UserLoginDto;
-import dto.UserVerifyDto;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
  
@@ -45,15 +43,14 @@ public class AuthController {
     private   JwtTokenProvider jwtTokenProvider;
 @Autowired
     private  UserService userService;
-    @Autowired
-	private UserRepo repo;
-@Autowired
-    private   PasswordEncoder passwordEncoder;
+    
+ 
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
    
-    
+//	@PreAuthorize("hasRole('USER')")
+
 //    private final SendEmailService sendEmailService;
 
 //    @Autowired
@@ -67,7 +64,8 @@ public class AuthController {
     
     
 
-     @RequestMapping(value = "/login", method = RequestMethod.POST)
+//     @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @PostMapping("/login")
     public ResponseEntity<?> generateToken(@RequestBody UserLoginDto userLoginDto) throws Exception {
 //        System.out.println("login");
     	 try {
@@ -78,32 +76,32 @@ public class AuthController {
 	        if(auth.isAuthenticated()) {
  
 	        	 
-	 			if (userService.findByEmail(userLoginDto.getEmail()).getStatus().equals("active")) {
-//	 				UserDto userDto = userService.findUserByEmail(userLoginDto.getEmail());
-	 				if(userService.findByEmail(userLoginDto.getEmail()).isBlocked()==true) {
-//	 					System.out.println("jai mata di");
-//	 					return "redirect:/signin";
+//	 			if (userService.findByEmail(userLoginDto.getEmail()).getStatus().equals("active")) {
+ 	 				if(userService.findByEmail(userLoginDto.getEmail()).isBlocked()==true) {
+ 
 	 	                return new ResponseEntity<>(BiometricMessage.USER_BLOCKED_CREATED , HttpStatus.FORBIDDEN);
 	 				}
 	 				 
 	 			
 	        SecurityContextHolder.getContext().setAuthentication(auth);
 	        String jwtToken = jwtTokenProvider.generateJwtToken(auth);
-//	        System.out.println(jwtToken);
-//	        return "Bearer " + jwtToken;
-	        Collection<? extends GrantedAuthority> userRole = auth.getAuthorities();
-	        return ResponseEntity.ok(new JwtResponse(jwtToken,userRole.toString()));
+//	       String status =  userService.findByEmail(userLoginDto.getEmail()).getStatus();
+//	        Collection<? extends GrantedAuthority> userRole = auth.getAuthorities();
+//	       System.out.println(userRole[0]);
+	        return ResponseEntity.ok(new JwtResponse(jwtToken));
 
-        }
-	 			else {
-	 				SecurityContextHolder.getContext().setAuthentication(auth);
-	 		        String jwtToken = jwtTokenProvider.generateJwtToken(auth);
-//	 		        System.out.println(jwtToken);
-//	 		        return "Bearer " + jwtToken;
-	 		       Collection<? extends GrantedAuthority> userRole = auth.getAuthorities();
-	 		        return ResponseEntity.ok(new JwtResponse(jwtToken,userRole.toString()));
-//	 		       return new ResponseEntity<>(BiometricMessage.USER_NOT_LOGIN , HttpStatus.UNAUTHORIZED);
-	 			}
+//        }
+//	 			else {
+//	 				SecurityContextHolder.getContext().setAuthentication(auth);
+//	 		        String jwtToken = jwtTokenProvider.generateJwtToken(auth);
+////	 		        System.out.println(jwtToken);
+////	 		        return "Bearer " + jwtToken;
+//	 		       String status =  userService.findByEmail(userLoginDto.getEmail()).getStatus();
+//
+//	 		       Collection<? extends GrantedAuthority> userRole = auth.getAuthorities();
+//	 		        return ResponseEntity.ok(new JwtResponse(jwtToken,userRole.toString(),status));
+////	 		       return new ResponseEntity<>(BiometricMessage.USER_NOT_LOGIN , HttpStatus.UNAUTHORIZED);
+//	 			}
         }
         }
          
@@ -128,12 +126,12 @@ public class AuthController {
             	 return new ResponseEntity<>(BiometricMessage.USER_ALREADY_EXIST , HttpStatus.CREATED);
 	        }
 	        userService.add(user);
-                System.out.println("success");            
+//                System.out.println("success");            
                 return new ResponseEntity<>(BiometricMessage.USER_CREATED, HttpStatus.CREATED);
     }
 
  
-	@GetMapping("/verify")
+	@PostMapping("/verify")
 	public ResponseEntity<?> verify( @RequestBody UserVerifyDto userVerifyDto ) {
 		try {
 		Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
@@ -144,13 +142,16 @@ public class AuthController {
 			{
 				String email = ((UserDetails) principal).getUsername();
 			 
- 
+// System.out.println(email);
+// String string = null;
 					
 					String string = userService.verify(email, userVerifyDto.getOtp());
 //					System.out.println(string);
 					if (string != null) {
-						
-						return new ResponseEntity<>(BiometricMessage.OTP_AUTH_SUCCESS, HttpStatus.CREATED);
+//						String i = null;
+				        return ResponseEntity.ok(new UserVerifyDto(userVerifyDto.getOtp(), string));
+
+//						return new ResponseEntity<>(BiometricMessage.OTP_AUTH_SUCCESS, HttpStatus.CREATED);
 					}  
 					 else {
 							return new ResponseEntity<>(BiometricMessage.OTP_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);					 
@@ -165,7 +166,8 @@ public class AuthController {
 	}
 	
 	@GetMapping("/resend")
-	public ResponseEntity<?> resend( @RequestBody UserVerifyDto userVerifyDto ) {
+	public ResponseEntity<?> resend() {
+
 		try {
 		Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
  System.out.println(authentication);
@@ -178,7 +180,7 @@ public class AuthController {
  
 //					if ("resend".equals(userVerifyDto.getAction())) {
 					UserVerifyDto user = userService.resendOtp(email);
-					System.out.println(user);
+//					System.out.println(user);	
 					if (user != null) {
 						 
 						return new ResponseEntity<>(BiometricMessage.OTP_RESEND_SUCCESS, HttpStatus.CREATED);
@@ -198,7 +200,33 @@ public class AuthController {
  
 		return null;
 	}
+	
+	 
+	@PostMapping("/forgetPass")
+	public ResponseEntity<?> forgetPass(@RequestBody UserCreateDto userDto,RedirectAttributes redirectAttributes,HttpServletRequest servletRequest) {
+//		System.out.println(userDto.getEmail());
+		User userByEmail = userService.getByUsername(userDto.getEmail());
+//		System.out.println(userByEmail.getId());
+//		System.out.println(userByEmail.getEmail());
+		if(userByEmail!=null) {
+			
+			StringBuffer url = servletRequest.getRequestURL();
+			String url2 = url.substring(0, url.indexOf("/forgetPass"));
+			System.out.println(url2);
+		com.extras.EmailSender.sendPasswordResetLink(userByEmail.getEmail(), url2+"/resetPass?id="+userByEmail.getId());
+		redirectAttributes.addFlashAttribute("msg", "A password reset link has been successfully sent to your email address. Please check your inbox and spam folder, and follow the instructions to reset your password.");
+		return new ResponseEntity<>(BiometricMessage.PASSWORD_SENT_SUCCESS , HttpStatus.OK);
+		}
+		return new ResponseEntity<>(BiometricMessage.USER_ALREADY_EXIST , HttpStatus.UNAUTHORIZED);
+	}
+	
+	@GetMapping("/current-user")
+	public User userInfo(Principal principal) {
+		return ((User)     this.customUserDetailsService.loadUserByUsernameList(principal.getName())) ;
+		
+	}
 }
+
 	
 
 

@@ -9,15 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.dto.UserCreateDto;
+import com.dto.UserDeleteRequest;
+import com.dto.UserVerifyDto;
 import com.entities.Role;
 import com.entities.User;
 import com.extras.EmailSender;
 import com.extras.OTPGenerator;
 import com.repos.UserRepo;
-
-import dto.UserCreateDto;
-import dto.UserDeleteRequest;
-import dto.UserVerifyDto;
 
 @Service
 public class UserServiceImpl  implements UserService{
@@ -52,13 +51,13 @@ public class UserServiceImpl  implements UserService{
 //			userDto.setOtp(otp);
 		 User user1 = new User();
 			Role role =new Role();
-			role.setName("ROLE_USER");
+			role.setName("USER");
 			HashSet<Role> hashSet=new HashSet<>();
 			hashSet.add(role);
 			user1.setRole(hashSet);
 			user1.setStatus("inactive");
 			String otp = OTPGenerator.generateOTP();
-			emailSender.sendOtp(userDto.getEmail(), otp);
+//			EmailSender.sendOtp(userDto.getEmail(), otp);
 			user1.setOtp(otp);
 			user1.setEmail(userDto.getEmail());
 			user1.setUsername(userDto.getUsername());
@@ -91,6 +90,7 @@ public class UserServiceImpl  implements UserService{
 	}
 	@Override
 	public User getByUsername(String email) {
+//		System.out.println(email);
 		User user =  repo.findByEmails(email);
 //		System.out.println(user);
 		return user;
@@ -99,10 +99,10 @@ public class UserServiceImpl  implements UserService{
 	@Override
 	public String verify(String email, String otp) {
 //		System.out.println("yes111 ");
-//		System.out.println(email);
-//		System.out.println(otp);
+		System.out.println(email);
+		System.out.println(otp);
 		User user = repo.findByEmailAndOtp(email, otp);
-		System.out.println(user);
+//		System.out.println(user);
 		if (user != null) {
 			user.setStatus("active");
 			repo.save(user);
@@ -120,11 +120,12 @@ public class UserServiceImpl  implements UserService{
 			user=optional.get();
 //			System.out.println("hellohello");
 			String otp = OTPGenerator.generateOTP();
-			EmailSender.sendOtp(user.getEmail(), otp);
+			System.out.println(otp);
+//			EmailSender.sendOtp(user.getEmail(), otp);
 			user.setOtp(otp);
 			User user2 = repo.save(user);
 			return modelMapper.map(user2, UserVerifyDto.class);
-//			return User2;
+//			return user2;
 		}
 		return null;
 	}

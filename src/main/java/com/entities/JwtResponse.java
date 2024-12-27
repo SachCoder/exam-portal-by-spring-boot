@@ -5,14 +5,14 @@ import lombok.Data;
 @Data
 public class JwtResponse {
     String token;
-    String userRole;
+    
 
     public JwtResponse() {
     }
 
-    public JwtResponse(String token, String userRole) {
+    public JwtResponse(String token ) {
         this.token = token;
-        this.userRole = userRole ;
+        
     }
 
     

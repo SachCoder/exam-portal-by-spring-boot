@@ -1,10 +1,9 @@
 package com.service;
 
+import com.dto.UserCreateDto;
+import com.dto.UserDeleteRequest;
+import com.dto.UserVerifyDto;
 import com.entities.User;
-
-import dto.UserCreateDto;
-import dto.UserDeleteRequest;
-import dto.UserVerifyDto;
 
 public interface UserService {
 	public User findByEmail(String email);
